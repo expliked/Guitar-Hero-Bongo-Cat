@@ -55,7 +55,6 @@ class Program:
         def set_name(a, b, c):
             self.streamer_name = update_name.get()
             self.update_streamer_name()
-            #window.destroy()
 
         def auto_bongo_toggle():
             if (self.use_random):
@@ -160,8 +159,6 @@ class Program:
         self.auto_bongo_delay = use_delay
         
         self.use_random = use_random
-        #console_thread = threading.Thread(target=self.console)
-        #console_thread.start()
         
         pygame.display.set_caption(self.window_name)
         self.game_display = pygame.display.set_mode(self.window_size)
@@ -210,7 +207,7 @@ class Program:
                     continue
 
                 print(event)
-                #"""
+
                 if (event.type == pygame.QUIT):
                     self.exit()
 
@@ -244,7 +241,7 @@ class Program:
                         if (event.value == (0, 0)):
                             self.strum = False
                             continue
-                #"""
+
             self.game_display.fill((255, 255, 255))
             
             if (self.strum):
@@ -254,21 +251,18 @@ class Program:
                 self.game_display.blit(bongo_not_strumming, (0, 0))
 
             if (self.frets != previous_frets):
-                #print("doing thing")
+
                 self.game_display.blit(fretting_img, right_paw_pos)
 
             else:
                 self.game_display.blit(bongo_not_fretting, right_paw_pos)
-            #self.game_display.blit(fretting_img, (0, 0))
 
             if (self.display_streamer_name):
                 self.game_display.blit(self.text_surface, self.text_rectangle)
                 
             pygame.display.update()
             self.game_clock.tick(60)
-            #print(self.frets, self.previous_frets)
-            #print(self.frets, self.previous_frets)
-            #print()
+
             time.sleep(0.001)
             
 if (__name__ == "__main__"):
