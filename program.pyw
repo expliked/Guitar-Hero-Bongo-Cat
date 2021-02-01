@@ -1,12 +1,13 @@
 import tkinter
 from tkinter import messagebox
 import time
+import random
 import webbrowser
 import threading
 import pygame
 pygame.init()
 
-streamer_name = "streamer name" # change this to whatever your name is or you can change it in options
+streamer_name = "" # change this to whatever your name is
 
 KeyDown = 2
 KeyUp = 3
@@ -27,6 +28,8 @@ watching_types = [
     JoyButtonUp
 ]
 
+right_paw_pos = (-20, 130)
+
 class Program:
     def exit(self):
         pygame.quit()
@@ -42,10 +45,15 @@ class Program:
                 time.sleep(self.auto_bongo_delay)
                 self.frets = []
             time.sleep(0.01)
+            
+    def console(self):
+        while (True):
+            user_input = input()
+            exec(user_input)
 
     def open_options(self):
-        def set_name():
-            self.streamer_name = streamer_name_box.get()
+        def set_name(a, b, c):
+            self.streamer_name = update_name.get()
             self.update_streamer_name()
             #window.destroy()
 
@@ -58,6 +66,15 @@ class Program:
 
             auto_bongo_button["text"] = "Disable auto-bongo" if self.use_random else "Enable auto-bongo"
 
+        def show_streamer_toggle():
+            if (self.display_streamer_name):
+                self.display_streamer_name = False
+
+            else:
+                self.display_streamer_name = True
+
+            show_streamer_button["text"] = "Show streamer name" if self.display_streamer_name else "Hide streamer name"
+            
         def set_auto_bongo_speed():
             temp = float(bongo_speed_box.get())
             if (temp < 0.1):
@@ -94,24 +111,30 @@ class Program:
         window = tkinter.Tk()
         window.title("Options")
         window.resizable(False, False)
+
+        update_name = tkinter.StringVar()
+        update_name.trace_add("write", set_name)
+        streamer_name_label = tkinter.Label(window, text="Set streamer name")
+        streamer_name_label.pack(padx=10, pady=(10, 0))
         
-        streamer_name_box = tkinter.Entry(window, textvariable=tkinter.StringVar(window, value=self.streamer_name), width=20)
-        streamer_name_box.pack(padx=10, pady=(10, 0))
+        streamer_name_box = tkinter.Entry(window, textvariable=update_name, width=20)
+        streamer_name_box.pack(padx=10, pady=(5, 0))
 
-        streamer_name_button = tkinter.Button(window, text="Set streamer name", command=set_name)
-        streamer_name_button.pack(padx=10, pady=(5, 0))
-
+        bongo_speed_label = tkinter.Label(window, text="Set auto-bongo speed interval")
+        bongo_speed_label.pack(padx=10, pady=(10, 0))
+        
         default_bongo_speed = tkinter.StringVar(value=str(self.auto_bongo_delay))
-        bongo_speed_box = tkinter.Spinbox(window, from_=0.1, to=100, increment=0.1, textvariable=default_bongo_speed, width=10)
-        bongo_speed_box.pack(padx=10, pady=(10, 0))
+        bongo_speed_box = tkinter.Spinbox(window, from_=0.1, to=100, increment=0.1, textvariable=default_bongo_speed, width=10, command=set_auto_bongo_speed)
+        bongo_speed_box.pack(padx=10, pady=(5, 0))
 
-        bongo_speed_button = tkinter.Button(window, text="Set auto-bongo speed", command=set_auto_bongo_speed)
-        bongo_speed_button.pack(padx=10, pady=(5, 10))
-        
         auto_bongo_text = "Disable auto-bongo" if self.use_random else "Enable auto-bongo"
         auto_bongo_button = tkinter.Button(window, text=auto_bongo_text, command=auto_bongo_toggle)
         auto_bongo_button.pack(padx=10, pady=(0, 10))
 
+        show_streamer_name_text = "Hide streamer name" if self.display_streamer_name else "Show streamer name"
+        show_streamer_button = tkinter.Button(window, text=show_streamer_name_text, command=show_streamer_toggle)
+        show_streamer_button.pack(padx=10, pady=(0, 10))
+        
         confirm_button = tkinter.Button(window, text="Done", command=exit_window)
         confirm_button.pack(padx=10, pady=(20, 0))
 
@@ -132,9 +155,13 @@ class Program:
         self.window_name = window_name
         self.window_size = window_size
 
+        self.display_streamer_name = True
         self.streamer_name = streamer_name
         self.auto_bongo_delay = use_delay
+        
         self.use_random = use_random
+        #console_thread = threading.Thread(target=self.console)
+        #console_thread.start()
         
         pygame.display.set_caption(self.window_name)
         self.game_display = pygame.display.set_mode(self.window_size)
@@ -142,11 +169,21 @@ class Program:
         
         self.game_display.fill((255, 255, 255))
         pygame.display.update()
+
+        bongo_not_strumming = pygame.image.load("assets/cat-0.png")
+        bongo_strumming = pygame.image.load("assets/cat-1.png")
+
+        bongo_not_fretting = pygame.image.load("assets/paw-right-0.png")
         
-        bongo_none = pygame.image.load("assets/bongo_none.png")
-        bongo_strumming = pygame.image.load("assets/bongo_strumming.png")
-        bongo_fretting = pygame.image.load("assets/bongo_fretting.png")
-        bongo_both = pygame.image.load("assets/bongo_both.png")
+        bongo_fretting = [
+            pygame.image.load("assets/paw-right-1.png"),
+            pygame.image.load("assets/paw-right-2.png"),
+            pygame.image.load("assets/paw-right-3.png"),
+            pygame.image.load("assets/paw-right-5.png"),
+            pygame.image.load("assets/paw-right-5.png")
+        ]
+        
+        fretting_img = random.choice(bongo_fretting)
         
         try:
             self.controller = pygame.joystick.Joystick(0)
@@ -161,7 +198,7 @@ class Program:
         self.update_streamer_name()
         
         self.frets = []
-        self.previous_frets = []
+        previous_frets = []
         self.strum = False
         
         random_thread = threading.Thread(target=self.random_events)
@@ -172,45 +209,66 @@ class Program:
                 if (event.type not in watching_types):
                     continue
 
+                print(event)
+                #"""
                 if (event.type == pygame.QUIT):
                     self.exit()
 
                 if (event.type == KeyDown):
                     if (event.key == 32): # space
-                        self.open_options()
+                        options_thread = threading.Thread(target=self.open_options)
+                        options_thread.start()
                         
-                if not (use_random):
+                if not (self.use_random):
+                    
                     if (hasattr(event, "button")):
+                        if (event.button not in [0, 1, 2, 3, 4]):
+                            continue
                         if (event.type == JoyButtonDown):
+                            
+                            self.previous_frets = self.frets
                             self.frets.append(event.button)
-
+                            fretting_img = random.choice(bongo_fretting)
+                                
+                            continue
+                        
                         if (event.type == JoyButtonUp):
                             self.frets.remove(event.button)
-
+                            continue
+                        
                     if (hasattr(event, "hat")):
                         if (event.value == down_strum or event.value == up_strum):
                             self.strum = True
-
+                            continue
+                        
                         if (event.value == (0, 0)):
                             self.strum = False
-
+                            continue
+                #"""
             self.game_display.fill((255, 255, 255))
             
-            if (self.frets and self.strum):
-                self.game_display.blit(bongo_both, (0, 0))
-                
-            if (self.frets and not self.strum):
-                self.game_display.blit(bongo_fretting, (0, 0))
-
-            if (self.strum and not self.frets):
+            if (self.strum):
                 self.game_display.blit(bongo_strumming, (0, 0))
+                
+            else:
+                self.game_display.blit(bongo_not_strumming, (0, 0))
 
-            if (not self.strum and not self.frets):
-                self.game_display.blit(bongo_none, (0, 0))
+            if (self.frets != previous_frets):
+                #print("doing thing")
+                self.game_display.blit(fretting_img, right_paw_pos)
 
-            self.game_display.blit(self.text_surface, self.text_rectangle)
+            else:
+                self.game_display.blit(bongo_not_fretting, right_paw_pos)
+            #self.game_display.blit(fretting_img, (0, 0))
+
+            if (self.display_streamer_name):
+                self.game_display.blit(self.text_surface, self.text_rectangle)
+                
             pygame.display.update()
             self.game_clock.tick(60)
+            #print(self.frets, self.previous_frets)
+            #print(self.frets, self.previous_frets)
+            #print()
             time.sleep(0.001)
             
 if (__name__ == "__main__"):
