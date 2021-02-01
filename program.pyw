@@ -6,7 +6,7 @@ import threading
 import pygame
 pygame.init()
 
-streamer_name = "expliked" # change this to whatever your name is
+streamer_name = "streamer name" # change this to whatever your name is or you can change it in options
 
 KeyDown = 2
 KeyUp = 3
@@ -42,11 +42,6 @@ class Program:
                 time.sleep(self.auto_bongo_delay)
                 self.frets = []
             time.sleep(0.01)
-            
-    def console(self):
-        while (True):
-            user_input = input()
-            exec(user_input)
 
     def open_options(self):
         def set_name():
@@ -139,10 +134,7 @@ class Program:
 
         self.streamer_name = streamer_name
         self.auto_bongo_delay = use_delay
-        
         self.use_random = use_random
-        #console_thread = threading.Thread(target=self.console)
-        #console_thread.start()
         
         pygame.display.set_caption(self.window_name)
         self.game_display = pygame.display.set_mode(self.window_size)
@@ -180,8 +172,6 @@ class Program:
                 if (event.type not in watching_types):
                     continue
 
-                print(event)
-                #"""
                 if (event.type == pygame.QUIT):
                     self.exit()
 
@@ -203,7 +193,7 @@ class Program:
 
                         if (event.value == (0, 0)):
                             self.strum = False
-                #"""
+
             self.game_display.fill((255, 255, 255))
             
             if (self.frets and self.strum):
