@@ -203,10 +203,9 @@ class Program:
             
         while (True):
             for event in pygame.event.get():
+                print(event)
                 if (event.type not in watching_types):
                     continue
-
-                print(event)
 
                 if (event.type == pygame.QUIT):
                     self.exit()
@@ -219,6 +218,15 @@ class Program:
                 if not (self.use_random):
                     
                     if (hasattr(event, "button")):
+                        if (event.button in [6, 7]):
+                            if (event.type == 10):
+                                self.strum = True
+                                continue
+
+                            if (event.type == 11):
+                                self.strum = False
+                                continue
+                            
                         if (event.button not in [0, 1, 2, 3, 4]):
                             continue
                         if (event.type == JoyButtonDown):
@@ -241,7 +249,7 @@ class Program:
                         if (event.value == (0, 0)):
                             self.strum = False
                             continue
-
+                    
             self.game_display.fill((255, 255, 255))
             
             if (self.strum):
@@ -251,7 +259,6 @@ class Program:
                 self.game_display.blit(bongo_not_strumming, (0, 0))
 
             if (self.frets != previous_frets):
-
                 self.game_display.blit(fretting_img, right_paw_pos)
 
             else:
@@ -262,7 +269,6 @@ class Program:
                 
             pygame.display.update()
             self.game_clock.tick(60)
-
             time.sleep(0.001)
             
 if (__name__ == "__main__"):
